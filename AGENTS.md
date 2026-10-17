@@ -4,7 +4,7 @@ This repository starts a **Top-Down** game on the **IT Kamianets 3D Engine**: vi
 
 For games viewed primarily from above, with direct player movement and action-focused gameplay.
 
-It holds no Unity project yet: creating it is the first task below. Until then the repository is this guide, the git settings and the license.
+It holds an empty Unity project (Universal 3D template, Unity **6000.6**): one scene, `Assets/Scenes/Main.unity`, the URP settings, `Packages/manifest.json` and `ProjectSettings/`. Everything else is built from this guide.
 
 ## Read first
 
@@ -12,12 +12,11 @@ It holds no Unity project yet: creating it is the first task below. Until then t
 - https://3d.itkamianets.com/llms.txt: short index of the docs.
 - https://3d.itkamianets.com/constructors/top-down: this constructor on the website.
 
-## 1. Create the Unity project
+## 1. Open the Unity project
 
-1. In Unity Hub, create a new project with the **Universal 3D** template and Unity **6000.6**, in a temporary folder.
-2. Move its `Assets/`, `Packages/` and `ProjectSettings/` into this repository, next to this file. Leave `Library/` behind; Unity rebuilds it.
-3. Open this repository's folder in Unity Hub (Add › this folder).
-4. In `Project Settings › Player`, set Product Name and the application identifier (`com.itkamianets.<game>`).
+1. In Unity Hub: Add › this repository's folder, and open it with Unity **6000.6** (the first import takes a minute; `Library/` is rebuilt locally and never committed).
+2. In `Project Settings › Player`, set Product Name and the application identifier (`com.itkamianets.<game>`, letters and dots only) for the game.
+3. The project has no project-wide input actions asset on purpose: all input comes from `3d-unity-input`'s `EngineInput` (step 2).
 
 ## 2. Add the engine packages
 
@@ -60,13 +59,13 @@ Merge these into `dependencies` in `Packages/manifest.json`. Unity installs each
 ## 3. Build the game
 
 1. Create the constructor packages in the engine, modeled on the Character View ones: `3d-constructor-top-down-camera` (overhead follow) and `3d-constructor-top-down-controls` (screen-relative movement, aim). They drive `3d-unity-character`, which already handles movement.
-2. Create `Assets/Scenes/Main.unity` with a ground plane, a player using `3d-unity-character`, and the camera.
+2. Build `Assets/Scenes/Main.unity` up with a ground plane, a player using `3d-unity-character`, and the camera.
 3. Add the interface packages (`<game>-menus`, `<game>-hud`), then the gameplay (`<game>-core`, `<game>-maps`, `<game>-enemies`).
 
 **Name game packages `<game>-<part>`**, package id `com.itkamianets.<game>-<part>`, e.g. `temnorid-arena-core`. Suggested for this kind of game: `<game>-menus`, `<game>-hud`, `<game>-core`, `<game>-maps`, `<game>-enemies`, `<game>-upgrades`.
 
 - **Interface first, then gameplay.** Menus and HUD give a playable loop early; rules and content follow.
-- Game packages live in their own repos, so several games can share one, or under `Packages/<game>-<part>/` while the game is young.
+- Game packages live in their own repos (cloned into `Packages/`, like the engine ones), so several games can share one; while the game is young, keep them as folders with their own asmdef under `Assets/<Game>/`.
 - Scenes, prefabs that wire packages together, and build settings stay in this project; reusable code goes into packages.
 - Rewrite `README.md` for the game and this file's first paragraph once the game has a name: what it is, its packages, how to play.
 
@@ -80,13 +79,14 @@ Merge these into `dependencies` in `Packages/manifest.json`. Unity installs each
 
 ## This repository is the game's workspace
 
-The game's Unity project sits at the root of this repository. Engine repos you need to read or change are cloned **inside** it and ignored by git (`.gitignore` ignores every `/3d-*/` folder), so they never end up in the game's history:
+The game's Unity project sits at the root of this repository, laid out like the engine's own workspace (where the game Temnorid Arena is the root). Package repos you need to read or change are cloned **into `Packages/`**: Unity loads each one there as an embedded package, in place of its git URL in the manifest, and git ignores them (`.gitignore` ignores `Packages/*` except `manifest.json` and `packages-lock.json`), so they never end up in the game's history:
 
 ```text
-<game-name>/               this repo: the game
-  Assets/ Packages/ ProjectSettings/
+<game-name>/                       this repo: the game
+  Assets/ ProjectSettings/
+  Packages/manifest.json           tracked: Unity packages and the engine packages by git URL
+  Packages/3d-unity-character/     a cloned engine repo, git-ignored, used instead of its git URL
   AGENTS.md  README.md
-  3d-unity-character/      cloned engine repo, git-ignored
 ```
 
 Normally there is nothing to clone: Unity downloads the engine packages by their git URLs.
@@ -95,11 +95,10 @@ Normally there is nothing to clone: Unity downloads the engine packages by their
 
 Engine packages (`3d-*`) are shared by every game, so changes go back to them through a pull request, never as a copy inside the game.
 
-1. Clone the package into this repository: `git clone https://github.com/IT-Kamianets/3d-unity-character`. Without write access to IT-Kamianets, fork it on GitHub first and clone your fork.
+1. Clone the package into `Packages/`: `git clone https://github.com/IT-Kamianets/3d-unity-character Packages/3d-unity-character`. Without write access to IT-Kamianets, fork it on GitHub first and clone your fork. Unity now uses this copy instead of the git URL; the manifest stays as it is.
 2. Create a branch for the change.
-3. Point the game at your copy while you work: in `Packages/manifest.json`, `"com.itkamianets.3d-unity-character": "file:../3d-unity-character"`.
-4. Open a pull request to the package's `master` branch. Keep game rules out of it: the change must make sense for every game.
-5. After it is merged, switch the manifest back to the git URL (pinned to the new tag) and delete the clone.
+3. Open a pull request to the package's `master` branch. Keep game rules out of it: the change must make sense for every game.
+4. After it is merged, delete the clone (Unity goes back to the git URL) and pin the manifest to the new tag.
 
 **Pin versions** before a release: `https://github.com/IT-Kamianets/3d-unity-core.git#v0.1.0`.
 

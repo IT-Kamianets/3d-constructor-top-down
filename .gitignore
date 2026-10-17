@@ -112,5 +112,9 @@ desktop.ini
 .idea/
 .vscode/
 
-# Engine repos cloned into this game to change them (see AGENTS.md): each is its own repo.
-/3d-*/
+# Engine (and your game's) package repos cloned into Packages/ to read or change them: Unity loads
+# each as an embedded package, overriding its git URL in the manifest. They are separate repos, so
+# git ignores them here; only the manifest and its lock file belong to the game.
+/Packages/*
+!/Packages/manifest.json
+!/Packages/packages-lock.json
